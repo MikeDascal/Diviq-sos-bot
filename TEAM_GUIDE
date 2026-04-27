@@ -1,0 +1,51 @@
+# DiviQ SOS Bot - Team Guide
+This guide is for DiviQ team members who receive SOS alerts from the Discrod #sos channel.
+No technicla knowledge needed to follow this guide.
+
+## What does the bot does?
+When someone posts anything in the **#sos** channel on the Discord:
+1. The bot sends them a private DM asking them to describe what they need.
+2. The person has 5 minutes to reply to that DM
+3. Once they reply, the bot emails the team with:
+  - Their Discord name
+  - Their original #sos message
+  - Their detailed DM reply
+
+If the person has DMs disabled, the bot mentions them in #sos with instructions to enable DMs.
+
+## When you receive an SOS email?
+The email will come from the bot and be in your inbox with the subject line containing the person's Discord name.
+Please do the following:
+1. Read it carefully
+2. Resond within 24 hours.
+3. Go to Discord and reach out to them directly.
+4. Do not share the contents of the SOS with anyone outisde the core team.
+5. Take notes for our internal record (date, username, nature of need, action taken)
+
+## What to say to them?
+Examples:
+- "Hey, we saw your message in #sos and we are here".
+- "Thank you for reaching out, we are listening".
+- "You are not alone in this. Can you tell us a bit more about what is going on?"-
+
+Avoid:
+- Going straight to advice or resources before they feel heard.
+- Asking too many questions at once.
+- Making promises you are not sure you can keep.
+
+## If it's an emergency.
+If the message suggests immediate danger to themselves or others:
+1. Respond on Discord immediately.
+2. Share relevant information with the core team.
+3. Alert another team member right away, do not handle this alone.
+4. Follow DiviQ's safeguarding policy. 
+
+## Who receives the SOS emails?
+
+
+## How to request changes to the bot?
+Reach out to the team member(s) managing the GitHub repository and the server.
+
+## Maintaining this guide.
+This guide should be reviewed every 3 months or after any significant incident. 
+Last update: April 2026. 
