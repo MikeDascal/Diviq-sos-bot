@@ -13,14 +13,17 @@ When someone posts anything in the **#sos** channel on the Discord:
 
 If the person has DMs disabled, the bot mentions them in #sos with instructions to enable DMs.
 
-## When you receive an SOS email?
-The email will come from the bot and be in your inbox with the subject line containing the person's Discord name.
-Please do the following:
-1. Read it carefully
-2. Resond within 24 hours.
-3. Go to Discord and reach out to them directly.
-4. Do not share the contents of the SOS with anyone outisde the core team.
-5. Take notes for our internal record (date, username, nature of need, action taken)
+## What to do when you receive an SOS email?
+
+The email will come from the bot and land in your inbox with the subject line containing the person's Discord name. The same alert also appears in our private Discord admin channel. 
+
+The first person to see it takes point:
+- Text the team group chat immediately: "SOS just came in, who can take this in the next 10 minutes?"
+- The first available person responds and they are the one who will reach out to the community member.
+- The person goes to Discord and contacts them directly via DM 
+- Let the group chat know that you have taken the case, so no one doubles up.
+- DO NOT SHARE the contents of the SOS outside the core team.
+- Note the date, username, nature of need, action taken, and who responded. 
 
 ## What to say to them?
 Examples:
@@ -32,6 +35,7 @@ Avoid:
 - Going straight to advice or resources before they feel heard.
 - Asking too many questions at once.
 - Making promises you are not sure you can keep.
+- Having two team members reach out simultaneously, always confirm in the group chat first who is taking it. 
 
 ## If it's an emergency.
 If the message suggests immediate danger to themselves or others:
