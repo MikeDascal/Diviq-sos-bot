@@ -66,6 +66,14 @@ async def on_message(message: discord.Message):
 
     if user.id in active_conversations:
         log.info("Skipping — user %s (%s) already has an active conversation", user.display_name, user.name)
+        try:
+            dm = await user.create_dm()
+            await dm.send(
+                "Hey! I already have a message open with you and I'm waiting for your reply here in this DM. "
+                "Just respond here whenever you're ready and I'll get the team notified right away!"
+            )
+        except discord.Forbidden:
+            pass
         return
 
     active_conversations.add(user.id)
