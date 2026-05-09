@@ -1,4 +1,6 @@
 import asyncio
+import logging
+import logging.handlers
 import os
 import smtplib
 from email.mime.multipart import MIMEMultipart
@@ -9,6 +11,16 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
+# ---------- logging setup ----------
+os.makedirs("logs", exist_ok=True)
+_handler = logging.handlers.RotatingFileHandler(
+    "logs/bot.log", maxBytes=5 * 1024 * 1024, backupCount=5, encoding="utf-8"
+)
+_handler.setFormatter(logging.Formatter("%(asctime)s [%(levelname)s] %(message)s"))
+logging.basicConfig(level=logging.INFO, handlers=[_handler, logging.StreamHandler()])
+log = logging.getLogger("diviq-sos")
+# -----------------------------------
+
 TOKEN = os.getenv("DISCORD_TOKEN")
 SOS_CHANNEL_NAME = os.getenv("SOS_CHANNEL_NAME", "sos")
 
@@ -18,7 +30,7 @@ SMTP_USER = os.getenv("SMTP_USER")
 SMTP_PASSWORD = os.getenv("SMTP_PASSWORD")
 EMAIL_RECIPIENTS = [e.strip() for e in os.getenv("EMAIL_RECIPIENTS", "").split(",") if e.strip()]
 
-DM_TIMEOUT = 300  # seconds the bot waits for the user's DM reply
+DM_TIMEOUT = 600  # seconds the bot waits for the user's DM reply
 
 intents = discord.Intents.default()
 intents.message_content = True
@@ -31,8 +43,8 @@ active_conversations: set[int] = set()
 
 @client.event
 async def on_ready():
-    print(f"Logged in as {client.user} (id: {client.user.id})")
-    print(f"Listening for messages in #{SOS_CHANNEL_NAME}")
+    log.info("Logged in as %s (id: %s)", client.user, client.user.id)
+    log.info("Listening for messages in #%s", SOS_CHANNEL_NAME)
 
 
 @client.event
@@ -47,22 +59,32 @@ async def on_message(message: discord.Message):
         return
 
     user = message.author
+    log.info(
+        "Channel message | user=%s (%s) | channel=#%s | content=%r",
+        user.display_name, user.name, message.channel.name, message.content,
+    )
+
     if user.id in active_conversations:
+        log.info("Skipping — user %s (%s) already has an active conversation", user.display_name, user.name)
         return
 
     active_conversations.add(user.id)
     try:
         await _handle_sos(message)
+    except Exception:
+        log.exception("Unhandled error in _handle_sos for user %s (%s)", user.display_name, user.name)
     finally:
         active_conversations.discard(user.id)
 
 
 async def _handle_sos(message: discord.Message):
     user = message.author
+    log.info("SOS flow started for user=%s (%s)", user.display_name, user.name)
 
     try:
         dm = await user.create_dm()
     except discord.Forbidden:
+        log.warning("Cannot open DM for user=%s (%s) — Forbidden", user.display_name, user.name)
         try:
             await message.channel.send(
                 f"{user.mention} I couldn't open a DM with you. "
@@ -70,9 +92,10 @@ async def _handle_sos(message: discord.Message):
                 delete_after=15,
             )
         except discord.Forbidden:
-            pass
+            log.warning("Also cannot send channel message to %s (%s) — Forbidden", user.display_name, user.name)
         return
 
+    log.info("DM channel opened for user=%s (%s)", user.display_name, user.name)
     await dm.send(
         f"Hi {user.display_name}! I noticed your message in **#{message.channel.name}**.\n\n"
         "Please describe what you need and someone from the team will be notified right away. "
@@ -85,11 +108,16 @@ async def _handle_sos(message: discord.Message):
     try:
         reply = await client.wait_for("message", check=is_dm_reply, timeout=DM_TIMEOUT)
     except asyncio.TimeoutError:
+        log.info("DM reply timed out for user=%s (%s)", user.display_name, user.name)
         await dm.send(
             "Your request timed out. Post in the SOS channel again whenever you're ready."
         )
         return
 
+    log.info(
+        "DM reply received | user=%s (%s) | content=%r",
+        user.display_name, user.name, reply.content,
+    )
     await dm.send(
         "Got it — your message has been sent to the team. Someone will follow up with you shortly!"
     )
@@ -103,7 +131,7 @@ async def _handle_sos(message: discord.Message):
 
 def _send_email(user: discord.Member, sos_message: str, detail_message: str):
     if not EMAIL_RECIPIENTS:
-        print("WARNING: No EMAIL_RECIPIENTS configured — skipping email.")
+        log.warning("No EMAIL_RECIPIENTS configured — skipping email for user=%s (%s)", user.display_name, user.name)
         return
 
     subject = f"DiviQ SOS — {user.display_name}"
@@ -129,9 +157,12 @@ def _send_email(user: discord.Member, sos_message: str, detail_message: str):
             server.starttls()
             server.login(SMTP_USER, SMTP_PASSWORD)
             server.sendmail(SMTP_USER, EMAIL_RECIPIENTS, msg.as_string())
-        print(f"Email sent for SOS from {user.name} to {EMAIL_RECIPIENTS}")
-    except Exception as exc:
-        print(f"ERROR sending email: {exc}")
+        log.info("Email sent for SOS from user=%s (%s) to %s", user.display_name, user.name, EMAIL_RECIPIENTS)
+    except Exception:
+        log.exception("Failed to send email for user=%s (%s)", user.display_name, user.name)
 
 
-client.run(TOKEN)
+try:
+    client.run(TOKEN)
+except Exception:
+    log.exception("Bot crashed — client.run raised an unhandled exception")
